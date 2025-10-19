@@ -4,18 +4,17 @@
 
 -- Şehirler
 CREATE TABLE public.cities (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id int4 PRIMARY KEY ,
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
-  plate_code int NOT NULL,
   latitude numeric(10,6),
   longitude numeric(10,6)
 );
 
 -- İlçeler
 CREATE TABLE public.districts (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  city_id uuid REFERENCES public.cities(id) ON DELETE CASCADE,
+  id int4 PRIMARY KEY DEFAULT gen_random_uuid(),
+  city_id int4 REFERENCES public.cities(id) ON DELETE CASCADE,
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
   latitude numeric(10,6),
@@ -86,8 +85,8 @@ CREATE TABLE public.business_categories (
 CREATE TABLE public.business_districts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id uuid REFERENCES public.businesses(id) ON DELETE CASCADE,
-  city_id uuid REFERENCES public.cities(id) ON DELETE CASCADE,
-  district_id uuid REFERENCES public.districts(id) ON DELETE CASCADE
+  city_id int4 REFERENCES public.cities(id) ON DELETE CASCADE,
+  district_id int4 REFERENCES public.districts(id) ON DELETE CASCADE
 );
 
 -- İşletme çalışma saatleri
