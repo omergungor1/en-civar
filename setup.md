@@ -8,6 +8,8 @@ Tasarım modern olmalı, yelp ve benzeri modern local rehber sitelerinin tasarı
 Tüm site Türkçe olacaktır. 
 Gerekli tablolar
 
+Not: Tüm sayfaları teker teker yap! Bir sayfayı tamamlayınca diğerine geç! Hiçbir sayfa yarım kalmamalıdır! 
+
 
 
 
