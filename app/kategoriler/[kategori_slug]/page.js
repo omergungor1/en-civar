@@ -117,7 +117,7 @@ export default function CategoryDetail() {
                         <p className="text-gray-600 mb-4">Aradığınız kategori mevcut değil.</p>
                         <button
                             onClick={() => router.push('/')}
-                            className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                            className="bg-[#FF6000] text-white px-6 py-2 rounded-lg hover:bg-[#ea580c] transition-colors"
                         >
                             Ana Sayfaya Dön
                         </button>
@@ -134,28 +134,46 @@ export default function CategoryDetail() {
 
             <main>
                 {/* Hero Section */}
-                <div className="relative h-64 bg-gradient-to-r from-primary-500 to-primary-700">
+                <div className="relative h-64 md:h-80 bg-gradient-to-br from-[#FF6000] to-[#ea580c] overflow-hidden">
                     {category.image_url && (
-                        <Image
-                            src={category.image_url}
-                            alt={category.picture_alt_text || category.name}
-                            fill
-                            className="object-contain opacity-20"
-                        />
+                        <div className="absolute inset-0">
+                            <Image
+                                src={category.image_url}
+                                alt={category.picture_alt_text || category.name}
+                                fill
+                                className="object-cover opacity-40"
+                            />
+                        </div>
                     )}
-                    <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                     <div className="relative z-10 flex items-center justify-center h-full">
                         <div className="text-center text-white px-4">
-                            <h1 className="text-3xl md:text-4xl font-bold mb-2">{category.name}</h1>
+                            <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-lg">{category.name}</h1>
                             {category.tagline && (
-                                <p className="text-lg md:text-xl opacity-90">{category.tagline}</p>
+                                <p className="text-lg md:text-xl opacity-95 drop-shadow-md max-w-2xl mx-auto">{category.tagline}</p>
                             )}
+                            <div className="px-4 py-6">
+                                <div className="max-w-md mx-auto">
+                                    <button
+                                        onClick={openSearchMode}
+                                        className="w-full flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-white shadow-sm hover:border-primary-300 transition-colors"
+                                    >
+                                        <svg className="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span className="text-gray-500">
+                                            {selectedDistrict ? `${selectedDistrict.name}, ${selectedDistrict.cities?.name}` : 'Konum seçin'}
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Konum Seçimi */}
-                <div className="px-4 py-6">
+                {/* <div className="px-4 py-6">
                     <div className="max-w-md mx-auto">
                         <button
                             onClick={openSearchMode}
@@ -170,7 +188,7 @@ export default function CategoryDetail() {
                             </span>
                         </button>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Kategori Açıklaması */}
                 {category.description && (
@@ -197,7 +215,7 @@ export default function CategoryDetail() {
                             Geri
                         </button>
                         <div className="flex-shrink-0">
-                            <img src="/logo.png" alt="EnCivar" className="h-22 w-auto" />
+                            <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
                         </div>
                         <div className="w-12"></div>
                     </div>

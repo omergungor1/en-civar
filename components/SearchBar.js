@@ -13,6 +13,10 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
     const [showCategories, setShowCategories] = useState(false)
     const [showDistricts, setShowDistricts] = useState(false)
 
+    // Seçilen değerler için ayrı state'ler
+    const [selectedCategoryName, setSelectedCategoryName] = useState('')
+    const [selectedDistrictName, setSelectedDistrictName] = useState('')
+
     const categoryInputRef = useRef(null)
     const districtInputRef = useRef(null)
 
@@ -29,7 +33,7 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                 .select('*')
                 .eq('is_selectable', true)
                 .eq('is_active', true)
-                .or(`name.ilike.%${query}%,tagline.ilike.%${query}%,title.ilike.%${query}%,description.ilike.%${query}%,slug.ilike.%${query}%,seo_title.ilike.%${query}%,seo_description.ilike.%${query}%,meta_keywords.ilike.%${query}%,picture_alt_text.ilike.%${query}%`)
+                .or(`name.ilike.%${query}%,tagline.ilike.%${query}%,title.ilike.%${query}%,description.ilike.%${query}%,slug.ilike.%${query}%,seo_title.ilike.%${query}%,seo_description.ilike.%${query}%,picture_alt_text.ilike.%${query}%`)
                 .order('display_order')
                 .limit(10)
 
@@ -116,6 +120,7 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
 
     // Kategori seçme
     const handleCategorySelect = (category) => {
+        setSelectedCategoryName(category.name)
         onCategorySelect(category)
         setCategoryQuery('')
         setShowCategories(false)
@@ -125,10 +130,32 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
     }
 
     // İlçe seçme
-    const handleDistrictSelect = (district) => {
-        onDistrictSelect(district)
-        setDistrictQuery('')
-        setShowDistricts(false)
+    const handleDistrictSelect = async (district) => {
+        try {
+            // İlçe bilgisini şehir bilgisiyle birlikte al
+            const { data, error } = await supabase
+                .from('districts')
+                .select(`
+                    *,
+                    cities(name, slug)
+                `)
+                .eq('id', district.id)
+                .single()
+
+            if (error) throw error
+
+            onDistrictSelect(data)
+            setSelectedDistrictName(data.name)
+            setDistrictQuery('')
+            setShowDistricts(false)
+        } catch (error) {
+            console.error('İlçe seçme hatası:', error)
+            // Fallback: orijinal district objesini kullan
+            onDistrictSelect(district)
+            setSelectedDistrictName(district.name)
+            setDistrictQuery('')
+            setShowDistricts(false)
+        }
     }
 
     if (isSearchMode) {
@@ -143,11 +170,11 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                         İptal
                     </button>
                     <div className="flex-shrink-0">
-                        <img src="/logo.png" alt="EnCivar" className="h-22 w-auto" />
+                        <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
                     </div>
                     <button
                         onClick={handleSearch}
-                        className="bg-primary-500 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary-600 transition-colors"
+                        className="bg-[#FF6000] text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#ea580c] transition-colors"
                     >
                         Ara
                     </button>
@@ -165,8 +192,11 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                                 ref={categoryInputRef}
                                 type="text"
                                 placeholder="Ne lazım? Çilingir, Lokanta vs."
-                                value={categoryQuery}
-                                onChange={(e) => setCategoryQuery(e.target.value)}
+                                value={selectedCategoryName || categoryQuery}
+                                onChange={(e) => {
+                                    setCategoryQuery(e.target.value)
+                                    setSelectedCategoryName('')
+                                }}
                                 className="flex-1 outline-none text-gray-900 placeholder-gray-500"
                             />
                         </div>
@@ -199,8 +229,11 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                                 ref={districtInputRef}
                                 type="text"
                                 placeholder="Konum seçin"
-                                value={districtQuery}
-                                onChange={(e) => setDistrictQuery(e.target.value)}
+                                value={selectedDistrictName || districtQuery}
+                                onChange={(e) => {
+                                    setDistrictQuery(e.target.value)
+                                    setSelectedDistrictName('')
+                                }}
                                 className="flex-1 outline-none text-gray-900 placeholder-gray-500"
                             />
                         </div>

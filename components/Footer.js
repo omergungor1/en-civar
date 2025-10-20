@@ -6,10 +6,10 @@ export default function Footer() {
                     {/* Logo ve açıklama */}
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center mb-4">
-                            <img src="/logo.png" alt="EnCivar" className="h-22 w-auto" />
+                            <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
                         </div>
                         <p className="text-gray-600 text-sm leading-relaxed max-w-md">
-                            EnCivar, Türkiye'nin en kapsamlı yerel rehberi. Yakınınızdaki en iyi işletmeleri keşfedin,
+                            EnCivar, Türkiye'nin en kapsamlı yerel rehberi. Civarındaki en iyi işletmeleri keşfedin,
                             değerlendirmeleri okuyun ve size en uygun hizmeti bulun.
                         </p>
                     </div>

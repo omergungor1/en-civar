@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import Header from '../../../../components/Header'
-import Footer from '../../../../components/Footer'
-import { supabase } from '../../../../lib/supabase'
+import Header from '../../../components/Header'
+import Footer from '../../../components/Footer'
+import { supabase } from '../../../lib/supabase'
 
 export default function BusinessProfile() {
     const params = useParams()
@@ -16,52 +16,58 @@ export default function BusinessProfile() {
     const [category, setCategory] = useState(null)
     const [photos, setPhotos] = useState([])
     const [loading, setLoading] = useState(true)
+    const [selectedPhoto, setSelectedPhoto] = useState(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     useEffect(() => {
-        if (params.il_slug && params.ilce_slug && params.isletme_slug) {
+        if (params.isletme_slug) {
             fetchBusinessData()
         }
     }, [params])
 
+    // ESC tuşu ile modal'ı kapatma
+    useEffect(() => {
+        const handleEscKey = (event) => {
+            if (event.key === 'Escape') {
+                closePhotoModal()
+            }
+        }
+
+        if (isModalOpen) {
+            document.addEventListener('keydown', handleEscKey)
+            document.body.style.overflow = 'hidden'
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscKey)
+            document.body.style.overflow = 'unset'
+        }
+    }, [isModalOpen])
+
     const fetchBusinessData = async () => {
         try {
-            // Şehir bilgisini al
-            const { data: cityData, error: cityError } = await supabase
-                .from('cities')
-                .select('*')
-                .eq('slug', params.il_slug)
-                .single()
-
-            if (cityError) throw cityError
-            setCity(cityData)
-
-            // İlçe bilgisini al
-            const { data: districtData, error: districtError } = await supabase
-                .from('districts')
-                .select(`
-                    *,
-                    cities(*)
-                `)
-                .eq('slug', params.ilce_slug)
-                .eq('city_id', cityData.id)
-                .single()
-
-            if (districtError) throw districtError
-            setDistrict(districtData)
-
-            // İşletme bilgisini al
+            // İşletme bilgisini al (şehir ve ilçe bilgileriyle birlikte)
             const { data: businessData, error: businessError } = await supabase
                 .from('businesses')
                 .select(`
                     *,
+                    districts(
+                        *,
+                        cities(*)
+                    ),
                     business_categories(categories(*))
                 `)
                 .eq('slug', params.isletme_slug)
-                .eq('district_id', districtData.id)
                 .single()
 
             if (businessError) throw businessError
             setBusiness(businessData)
+
+            // Şehir ve ilçe bilgilerini ayarla
+            if (businessData.districts) {
+                setDistrict(businessData.districts)
+                setCity(businessData.districts.cities)
+            }
 
             // Ana kategoriyi al
             if (businessData.business_categories?.[0]?.categories) {
@@ -108,7 +114,7 @@ export default function BusinessProfile() {
                         <p className="text-gray-600 mb-4">Aradığınız işletme mevcut değil.</p>
                         <button
                             onClick={() => router.push('/')}
-                            className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+                            className="bg-[#FF6000] text-white px-6 py-2 rounded-lg hover:bg-[#ea580c] transition-colors"
                         >
                             Ana Sayfaya Dön
                         </button>
@@ -120,6 +126,16 @@ export default function BusinessProfile() {
     }
 
     const coverPhoto = photos.find(photo => photo.is_cover) || photos[0]
+
+    const openPhotoModal = (photo) => {
+        setSelectedPhoto(photo)
+        setIsModalOpen(true)
+    }
+
+    const closePhotoModal = () => {
+        setIsModalOpen(false)
+        setSelectedPhoto(null)
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -161,7 +177,7 @@ export default function BusinessProfile() {
                             <div className="w-full md:w-48 h-48 flex-shrink-0">
                                 {coverPhoto ? (
                                     <Image
-                                        src={coverPhoto.url}
+                                        src={coverPhoto.image_url}
                                         alt={business.name}
                                         width={192}
                                         height={192}
@@ -199,7 +215,7 @@ export default function BusinessProfile() {
                                     {business.phone && (
                                         <a
                                             href={`tel:${business.phone}`}
-                                            className="flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                                            className="flex items-center px-4 py-2 bg-[#FF6000] text-white rounded-lg font-medium hover:bg-[#ea580c] transition-colors"
                                         >
                                             <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -207,9 +223,9 @@ export default function BusinessProfile() {
                                             Ara
                                         </a>
                                     )}
-                                    {business.whatsapp && (
+                                    {business.phone && (
                                         <a
-                                            href={`https://wa.me/${business.whatsapp}`}
+                                            href={`https://wa.me/${business.phone}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors"
@@ -255,9 +271,13 @@ export default function BusinessProfile() {
                                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Fotoğraflar</h2>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         {photos.map((photo) => (
-                                            <div key={photo.id} className="aspect-square">
+                                            <div
+                                                key={photo.id}
+                                                className="aspect-square cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => openPhotoModal(photo)}
+                                            >
                                                 <Image
-                                                    src={photo.url}
+                                                    src={photo.image_url}
                                                     alt={business.name}
                                                     width={200}
                                                     height={200}
@@ -350,8 +370,8 @@ export default function BusinessProfile() {
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Hizmetler</h2>
                                     <div className="flex flex-wrap gap-2">
-                                        {business.business_categories.map((bc) => (
-                                            <span key={bc.id} className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
+                                        {business.business_categories.map((bc, index) => (
+                                            <span key={index} className="px-3 py-1 bg-[#ffedd5] text-primary-700 rounded-full text-sm">
                                                 {bc.categories?.name}
                                             </span>
                                         ))}
@@ -364,6 +384,29 @@ export default function BusinessProfile() {
             </main>
 
             <Footer />
+
+            {/* Fotoğraf Modal */}
+            {isModalOpen && selectedPhoto && (
+                <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
+                    <div className="relative max-w-4xl max-h-full">
+                        <button
+                            onClick={closePhotoModal}
+                            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+                        >
+                            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <Image
+                            src={selectedPhoto.image_url}
+                            alt={business.name}
+                            width={800}
+                            height={600}
+                            className="max-w-full max-h-full object-contain rounded-lg"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

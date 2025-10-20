@@ -5,7 +5,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'EnCivar - Türkiye\'nin Yerel Rehberi',
-  description: 'Yakınınızdaki en iyi işletmeleri keşfedin. Restoranlar, hizmetler, mağazalar ve daha fazlası.',
+  description: 'Civarındaki en iyi işletmeleri keşfedin. Restoranlar, hizmetler, mağazalar ve daha fazlası.',
   keywords: 'yerel rehber, işletme, restoran, hizmet, Türkiye',
 }
 

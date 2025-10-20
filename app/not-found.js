@@ -20,7 +20,7 @@ export default function NotFound() {
                     <div className="space-y-4">
                         <Link
                             href="/"
-                            className="inline-block bg-primary-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                            className="inline-block bg-[#FF6000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#ea580c] transition-colors"
                         >
                             Ana Sayfaya Dön
                         </Link>

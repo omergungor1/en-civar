@@ -63,6 +63,7 @@ CREATE TABLE public.categories (
   description text,
   slug text UNIQUE NOT NULL,
   image_url text,
+  icon_url text,
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now(),
   level smallint DEFAULT 1,

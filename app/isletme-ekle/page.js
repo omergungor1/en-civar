@@ -186,7 +186,7 @@ export default function BusinessAddPage() {
                             <div className="space-y-3">
                                 <button
                                     onClick={() => router.push('/')}
-                                    className="w-full bg-primary-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                                    className="w-full bg-[#FF6000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#ea580c] transition-colors"
                                 >
                                     Ana Sayfaya Dön
                                 </button>
@@ -449,7 +449,7 @@ export default function BusinessAddPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-primary-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-[#FF6000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#ea580c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Gönderiliyor...' : 'İşletme Ekle'}
                                 </button>

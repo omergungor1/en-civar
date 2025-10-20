@@ -115,7 +115,7 @@ export default function ContactPage() {
 
                             <button
                                 onClick={() => setSubmitted(false)}
-                                className="bg-primary-500 text-white px-6 py-3 border border-red-500 rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                                className="bg-[#FF6000] text-white px-6 py-3 border border-red-500 rounded-lg font-medium hover:bg-[#ea580c] transition-colors"
                             >
                                 Yeni Mesaj Gönder
                             </button>
@@ -222,7 +222,7 @@ export default function ContactPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-primary-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-[#FF6000] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#ea580c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Gönderiliyor...' : 'Mesaj Gönder'}
                                 </button>
