@@ -13,14 +13,21 @@ export default function BusinessAddPage() {
         tagline: '',
         description: '',
         phone: '',
-        whatsapp: '',
+        authorized_person: '',
         email: '',
         website: '',
         address: '',
         district_id: '',
         category_id: '',
-        latitude: '',
-        longitude: ''
+        business_hours: [
+            { day_of_week: 0, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+            { day_of_week: 1, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+            { day_of_week: 2, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+            { day_of_week: 3, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+            { day_of_week: 4, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+            { day_of_week: 5, open_time: '10:00', close_time: '16:00', is_closed: true, is_24_hours: false },
+            { day_of_week: 6, open_time: '00:00', close_time: '00:00', is_closed: true, is_24_hours: false },
+        ]
     })
     const [districts, setDistricts] = useState([])
     const [categories, setCategories] = useState([])
@@ -31,6 +38,7 @@ export default function BusinessAddPage() {
     useEffect(() => {
         fetchInitialData()
     }, [])
+
 
     const fetchInitialData = async () => {
         try {
@@ -79,11 +87,30 @@ export default function BusinessAddPage() {
         }
     }
 
+    const handleHourChange = (index, field, value) => {
+        setFormData(prev => {
+            const updated = [...prev.business_hours]
+            updated[index] = { ...updated[index], [field]: value }
+            // Mantık: is_closed true ise saatleri resetle, is_24_hours true ise saatleri 00:00-24:00 gösterme yerine disable
+            if (field === 'is_closed' && value) {
+                updated[index].is_24_hours = false
+            }
+            if (field === 'is_24_hours' && value) {
+                updated[index].is_closed = false
+            }
+            return { ...prev, business_hours: updated }
+        })
+    }
+
     const validateForm = () => {
         const newErrors = {}
 
         if (!formData.name.trim()) {
             newErrors.name = 'İşletme adı gereklidir'
+        }
+
+        if (!formData.authorized_person.trim()) {
+            newErrors.authorized_person = 'Yetkili adı gereklidir'
         }
 
         if (!formData.phone.trim()) {
@@ -112,6 +139,15 @@ export default function BusinessAddPage() {
             newErrors.email = 'Geçerli bir email adresi giriniz'
         }
 
+        // Çalışma saatleri temel kontrol
+        formData.business_hours.forEach(h => {
+            if (!h.is_closed && !h.is_24_hours) {
+                if (!h.open_time || !h.close_time) {
+                    newErrors.business_hours = 'Çalışma saatleri eksik. Açık günler için saatleri giriniz.'
+                }
+            }
+        })
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -126,30 +162,74 @@ export default function BusinessAddPage() {
         setLoading(true)
 
         try {
-            const { error } = await supabase
-                .from('business_submissions')
+            const { data: created, error } = await supabase
+                .from('businesses')
                 .insert([{
-                    ...formData,
+                    name: formData.name,
+                    tagline: formData.tagline,
+                    description: formData.description,
+                    phone: formData.phone,
+                    authorized_person: formData.authorized_person,
+                    email: formData.email,
+                    website: formData.website,
+                    address: formData.address,
+                    district_id: formData.district_id,
                     status: 'pending',
+                    verified: false,
                     created_at: new Date().toISOString()
                 }])
+                .select()
+                .single()
 
             if (error) throw error
+
+            // Çalışma saatlerini ve kategoriyi ekle
+            if (created?.id) {
+                // Çalışma saatlerini ekle
+                const hoursPayload = formData.business_hours.map(h => ({
+                    business_id: created.id,
+                    day_of_week: h.day_of_week,
+                    open_time: h.is_closed || h.is_24_hours ? null : h.open_time,
+                    close_time: h.is_closed || h.is_24_hours ? null : h.close_time,
+                    is_closed: h.is_closed,
+                    is_24_hours: h.is_24_hours,
+                }))
+                const { error: hoursError } = await supabase
+                    .from('business_hours')
+                    .insert(hoursPayload)
+                if (hoursError) throw hoursError
+
+                // Kategoriyi ekle
+                const { error: categoryError } = await supabase
+                    .from('business_categories')
+                    .insert([{
+                        business_id: created.id,
+                        category_id: formData.category_id
+                    }])
+                if (categoryError) throw categoryError
+            }
 
             setSubmitted(true)
             setFormData({
                 name: '',
+                authorized_person: '',
                 tagline: '',
                 description: '',
                 phone: '',
-                whatsapp: '',
                 email: '',
                 website: '',
                 address: '',
                 district_id: '',
                 category_id: '',
-                latitude: '',
-                longitude: ''
+                business_hours: [
+                    { day_of_week: 0, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+                    { day_of_week: 1, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+                    { day_of_week: 2, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+                    { day_of_week: 3, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+                    { day_of_week: 4, open_time: '09:00', close_time: '18:00', is_closed: false, is_24_hours: false },
+                    { day_of_week: 5, open_time: '10:00', close_time: '16:00', is_closed: true, is_24_hours: false },
+                    { day_of_week: 6, open_time: '00:00', close_time: '00:00', is_closed: true, is_24_hours: false },
+                ]
             })
 
         } catch (error) {
@@ -295,18 +375,20 @@ export default function BusinessAddPage() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">
-                                        WhatsApp
+                                    <label htmlFor="authorized_person" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Yetkili Adı *
                                     </label>
                                     <input
-                                        type="tel"
-                                        id="whatsapp"
-                                        name="whatsapp"
-                                        value={formData.whatsapp}
+                                        type="text"
+                                        id="authorized_person"
+                                        name="authorized_person"
+                                        value={formData.authorized_person}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                        placeholder="Örn: 0532 123 45 67"
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.authorized_person ? 'border-red-300' : 'border-gray-300'
+                                            }`}
+                                        placeholder="Örn: Ahmet Yılmaz"
                                     />
+                                    {errors.authorized_person && <p className="mt-1 text-sm text-red-600">{errors.authorized_person}</p>}
                                 </div>
                             </div>
 
@@ -362,6 +444,157 @@ export default function BusinessAddPage() {
                                 {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
                             </div>
 
+                            {/* Çalışma Saatleri */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-4">
+                                    Çalışma Saatleri
+                                </label>
+                                {errors.business_hours && <p className="mb-3 text-sm text-red-600">{errors.business_hours}</p>}
+
+                                {/* Desktop görünüm */}
+                                <div className="hidden md:block space-y-3">
+                                    {formData.business_hours.map((h, idx) => (
+                                        <div key={h.day_of_week} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                                            <div className="w-20 text-sm font-medium text-gray-700">
+                                                {h.day_of_week === 0 ? 'Pazartesi' :
+                                                    h.day_of_week === 1 ? 'Salı' :
+                                                        h.day_of_week === 2 ? 'Çarşamba' :
+                                                            h.day_of_week === 3 ? 'Perşembe' :
+                                                                h.day_of_week === 4 ? 'Cuma' :
+                                                                    h.day_of_week === 5 ? 'Cumartesi' : 'Pazar'}
+                                            </div>
+
+                                            <div className="flex items-center space-x-3">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!h.is_closed}
+                                                        onChange={(e) => handleHourChange(idx, 'is_closed', e.target.checked)}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm text-gray-600">Kapalı</span>
+                                                </label>
+
+                                                {!h.is_closed && (
+                                                    <label className="flex items-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={!!h.is_24_hours}
+                                                            onChange={(e) => handleHourChange(idx, 'is_24_hours', e.target.checked)}
+                                                            className="mr-2"
+                                                        />
+                                                        <span className="text-sm text-gray-600">24 Saat</span>
+                                                    </label>
+                                                )}
+                                            </div>
+
+                                            {!h.is_closed && !h.is_24_hours && (
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="time"
+                                                        value={h.open_time || ''}
+                                                        onChange={(e) => handleHourChange(idx, 'open_time', e.target.value)}
+                                                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                    />
+                                                    <span className="text-gray-500">-</span>
+                                                    <input
+                                                        type="time"
+                                                        value={h.close_time || ''}
+                                                        onChange={(e) => handleHourChange(idx, 'close_time', e.target.value)}
+                                                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {!h.is_closed && h.is_24_hours && (
+                                                <span className="text-sm text-green-600 font-medium">24 Saat Açık</span>
+                                            )}
+
+                                            {h.is_closed && (
+                                                <span className="text-sm text-red-600 font-medium">Kapalı</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Mobil görünüm */}
+                                <div className="md:hidden space-y-3">
+                                    {formData.business_hours.map((h, idx) => (
+                                        <div key={h.day_of_week} className="p-4 bg-gray-50 rounded-lg">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span className="font-medium text-gray-700">
+                                                    {h.day_of_week === 0 ? 'Pazartesi' :
+                                                        h.day_of_week === 1 ? 'Salı' :
+                                                            h.day_of_week === 2 ? 'Çarşamba' :
+                                                                h.day_of_week === 3 ? 'Perşembe' :
+                                                                    h.day_of_week === 4 ? 'Cuma' :
+                                                                        h.day_of_week === 5 ? 'Cumartesi' : 'Pazar'}
+                                                </span>
+
+                                                <div className="flex items-center space-x-3">
+                                                    <label className="flex items-center">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={!!h.is_closed}
+                                                            onChange={(e) => handleHourChange(idx, 'is_closed', e.target.checked)}
+                                                            className="mr-1"
+                                                        />
+                                                        <span className="text-xs text-gray-600">Kapalı</span>
+                                                    </label>
+
+                                                    {!h.is_closed && (
+                                                        <label className="flex items-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={!!h.is_24_hours}
+                                                                onChange={(e) => handleHourChange(idx, 'is_24_hours', e.target.checked)}
+                                                                className="mr-1"
+                                                            />
+                                                            <span className="text-xs text-gray-600">24 Saat</span>
+                                                        </label>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {!h.is_closed && !h.is_24_hours && (
+                                                <div className="grid grid-cols-2 gap-x-2 space-x-4">
+                                                    <div>
+                                                        <label className="block text-xs text-gray-500 mb-1">Açılış</label>
+                                                        <input
+                                                            type="time"
+                                                            value={h.open_time || ''}
+                                                            onChange={(e) => handleHourChange(idx, 'open_time', e.target.value)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-xs text-gray-500 mb-1">Kapanış</label>
+                                                        <input
+                                                            type="time"
+                                                            value={h.close_time || ''}
+                                                            onChange={(e) => handleHourChange(idx, 'close_time', e.target.value)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {!h.is_closed && h.is_24_hours && (
+                                                <div className="text-center py-2">
+                                                    <span className="text-sm text-green-600 font-medium">24 Saat Açık</span>
+                                                </div>
+                                            )}
+
+                                            {h.is_closed && (
+                                                <div className="text-center py-2">
+                                                    <span className="text-sm text-red-600 font-medium">Kapalı</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Konum ve Kategori */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -406,41 +639,6 @@ export default function BusinessAddPage() {
                                         ))}
                                     </select>
                                     {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
-                                </div>
-                            </div>
-
-                            {/* Koordinatlar */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label htmlFor="latitude" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Enlem (Latitude)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="any"
-                                        id="latitude"
-                                        name="latitude"
-                                        value={formData.latitude}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                        placeholder="Örn: 40.123456"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="longitude" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Boylam (Longitude)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="any"
-                                        id="longitude"
-                                        name="longitude"
-                                        value={formData.longitude}
-                                        onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                        placeholder="Örn: 29.123456"
-                                    />
                                 </div>
                             </div>
 

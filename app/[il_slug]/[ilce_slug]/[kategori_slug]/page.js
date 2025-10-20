@@ -229,12 +229,12 @@ export default function ListingPage() {
                     </div>
 
                     {/* İşletme Listesi */}
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {businesses.map((business) => {
                             const coverPhoto = business.business_photos?.find(photo => photo.is_cover) || business.business_photos?.[0]
 
                             return (
-                                <div key={business.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div key={business.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                                     {/* İşletme Görseli */}
                                     <div className="w-full h-48">
                                         {coverPhoto ? (
@@ -255,7 +255,7 @@ export default function ListingPage() {
                                     </div>
 
                                     {/* İşletme Bilgileri */}
-                                    <div className="p-4">
+                                    <div className="p-4 flex-1 flex flex-col">
                                         <div className="mb-3">
                                             <h3 className="text-lg font-semibold text-gray-900 mb-1">{business.name}</h3>
                                             {business.tagline && (
@@ -277,8 +277,8 @@ export default function ListingPage() {
                                             )}
                                         </div>
 
-                                        {/* Aksiyon Butonları - Mobil uyumlu */}
-                                        <div className="grid grid-cols-2 gap-2">
+                                        {/* Aksiyon Butonları */}
+                                        <div className="grid grid-cols-2 gap-2 mt-auto">
                                             {business.phone && (
                                                 <a
                                                     href={`tel:${business.phone}`}
@@ -287,7 +287,7 @@ export default function ListingPage() {
                                                     <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                                     </svg>
-                                                    Ara
+                                                    Hemen Ara
                                                 </a>
                                             )}
                                             {business.phone && (
@@ -305,16 +305,23 @@ export default function ListingPage() {
                                             )}
                                             <a
                                                 href={`/isletme/${business.slug}`}
-                                                className="flex items-center justify-center px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 transition-colors"
+                                                className="flex items-center justify-center px-4 py-2 border-2 border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:border-[#FF6000] hover:text-[#FF6000] hover:bg-orange-50 transition-all duration-300 hover:-translate-y-0.5"
                                             >
+                                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
                                                 Profil
                                             </a>
                                             <a
                                                 href={`https://maps.google.com/?q=${encodeURIComponent(business.address || '')}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center justify-center px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200 transition-colors"
+                                                className="flex items-center justify-center px-4 py-2 border-2 border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:border-[#FF6000] hover:text-[#FF6000] hover:bg-orange-50 transition-all duration-300 hover:-translate-y-0.5"
                                             >
+                                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
                                                 Yol Tarifi
                                             </a>
                                         </div>

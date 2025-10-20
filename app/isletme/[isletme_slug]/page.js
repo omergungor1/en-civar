@@ -55,7 +55,8 @@ export default function BusinessProfile() {
                         *,
                         cities(*)
                     ),
-                    business_categories(categories(*))
+                    business_categories(categories(*)),
+                    business_hours(day_of_week,open_time,close_time,is_24_hours,is_closed)
                 `)
                 .eq('slug', params.isletme_slug)
                 .single()
@@ -355,10 +356,30 @@ export default function BusinessProfile() {
                                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Çalışma Saatleri</h2>
                                     <div className="space-y-2 text-sm">
-                                        {business.business_hours.map((hour, index) => (
-                                            <div key={index} className="flex justify-between">
-                                                <span className="text-gray-600">{hour.day}</span>
-                                                <span className="text-gray-900">{hour.open_time} - {hour.close_time}</span>
+                                        {business.business_hours.map((day, index) => (
+                                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                                                <span className="text-gray-700 font-medium">
+                                                    {day.day_of_week === 0 ? 'Pazartesi' :
+                                                        day.day_of_week === 1 ? 'Salı' :
+                                                            day.day_of_week === 2 ? 'Çarşamba' :
+                                                                day.day_of_week === 3 ? 'Perşembe' :
+                                                                    day.day_of_week === 4 ? 'Cuma' :
+                                                                        day.day_of_week === 5 ? 'Cumartesi' :
+                                                                            day.day_of_week === 6 ? 'Pazar' : 'Bilinmeyen'}
+                                                </span>
+                                                <span className={`font-medium ${day.is_close
+                                                    ? 'text-red-600'
+                                                    : day.is_24_hours
+                                                        ? 'text-green-600'
+                                                        : 'text-gray-900'
+                                                    }`}>
+                                                    {day.is_close
+                                                        ? 'Kapalı'
+                                                        : day.is_24_hours
+                                                            ? '24 Saat Açık'
+                                                            : `${day.open_time.toString().substring(0, 5)} - ${day.close_time.toString().substring(0, 5)}`
+                                                    }
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
