@@ -63,7 +63,7 @@ export default function CategoryList() {
                 {categories.map((category, index) => (
                     <a
                         key={category.id}
-                        href={`/kategoriler/${category.slug}`}
+                        href={`/${category.slug}`}
                         className="group block"
                     >
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:shadow-[#FF6000]/10 transition-all duration-300 hover:-translate-y-1">

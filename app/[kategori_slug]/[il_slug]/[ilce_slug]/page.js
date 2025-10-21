@@ -1,186 +1,241 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { notFound } from 'next/navigation'
 import Header from '../../../../components/Header'
 import Footer from '../../../../components/Footer'
-import Logo from '../../../../components/Logo'
+import SearchModal from '../../../../components/SearchModal'
 import { supabase } from '../../../../lib/supabase'
 
-export default function ListingPage() {
-    const params = useParams()
-    const router = useRouter()
-    const [businesses, setBusinesses] = useState([])
-    const [category, setCategory] = useState(null)
-    const [district, setDistrict] = useState(null)
-    const [city, setCity] = useState(null)
-    const [subCategories, setSubCategories] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [isSearchMode, setIsSearchMode] = useState(false)
+// ISR ayarları - 24 saatte bir yenileme
+export const revalidate = 86400
 
-    useEffect(() => {
-        if (params.il_slug && params.ilce_slug && params.kategori_slug) {
-            fetchData()
+// SSG için generateStaticParams fonksiyonu
+export async function generateStaticParams() {
+    try {
+        // Tüm aktif kategorileri al
+        const { data: categories } = await supabase
+            .from('categories')
+            .select('slug')
+            .eq('is_active', true)
+            .eq('is_selectable', true)
+            .in('id', ['9dc39c23-6533-4079-8f4b-904de9fad59b', 'e206828b-d123-4fbe-ae5b-29598953fb29', 'e7497f15-d563-48b5-8a12-aa87ccb5277a'])
+
+
+        console.log('kategori sayısı:', categories.length)
+
+        if (!categories) {
+            return []
         }
-    }, [params])
 
-    const fetchData = async () => {
-        try {
-            // Şehir bilgisini al
-            const { data: cityData, error: cityError } = await supabase
+        // Bu şehirlere ait ilçeleri al
+        const { data: districts } = await supabase
+            .from('districts')
+            .select('slug, city_id, cities(slug)')
+            .eq('city_id', 16)
+            .in('id', [219, 220, 222, 223, 224, 226, 227, 228, 229, 231, 232, 233, 234])
+
+        console.log('ilçe sayısı:', districts.length)
+        if (!districts) {
+            return []
+        }
+
+        // Kombinasyonları oluştur
+        const params = []
+
+        for (const category of categories) {
+            for (const district of districts) {
+                // Bu şehre ait ilçeleri filtrele
+                params.push({
+                    kategori_slug: category.slug,
+                    il_slug: district.cities.slug,
+                    ilce_slug: district.slug
+                })
+            }
+        }
+
+
+        console.log(`SSG için ${params.length} sayfa oluşturulacak`)
+        return params
+    } catch (error) {
+        console.error('generateStaticParams hatası:', error)
+        return []
+    }
+}
+
+// SEO için dinamik metadata
+export async function generateMetadata({ params }) {
+    try {
+        const { kategori_slug, il_slug, ilce_slug } = await params
+
+        // Şehir bilgisini al
+        const { data: cityData } = await supabase
+            .from('cities')
+            .select('name')
+            .eq('slug', il_slug)
+            .single()
+
+        // İlçe bilgisini al
+        const { data: districtData } = await supabase
+            .from('districts')
+            .select('name')
+            .eq('slug', ilce_slug)
+            .single()
+
+        // Kategori bilgisini al
+        const { data: categoryData } = await supabase
+            .from('categories')
+            .select('name, seo_title, seo_description')
+            .eq('slug', kategori_slug)
+            .single()
+
+        if (!cityData || !districtData || !categoryData) {
+            return {
+                title: 'Sayfa Bulunamadı',
+                description: 'Aradığınız sayfa mevcut değil.'
+            }
+        }
+
+        const title = categoryData.seo_title || `${districtData.name}, ${cityData.name} yakınlarındaki en iyi ${categoryData.name.toLowerCase()}`
+        const description = categoryData.seo_description || `${districtData.name}, ${cityData.name} bölgesindeki ${categoryData.name.toLowerCase()} hizmeti veren işletmeleri keşfedin.`
+
+        return {
+            title,
+            description,
+            openGraph: {
+                title,
+                description,
+                type: 'website',
+            },
+        }
+    } catch (error) {
+        console.error('generateMetadata hatası:', error)
+        return {
+            title: 'Sayfa Bulunamadı',
+            description: 'Aradığınız sayfa mevcut değil.'
+        }
+    }
+}
+
+// Veri çekme fonksiyonu - SSG için optimize edilmiş
+async function fetchPageData(params) {
+    const { kategori_slug, il_slug, ilce_slug } = await params
+
+    try {
+        // Paralel olarak temel verileri al
+        const [cityResult, categoryResult] = await Promise.all([
+            supabase
                 .from('cities')
                 .select('*')
-                .eq('slug', params.il_slug)
-                .single()
-
-            if (cityError) throw cityError
-            setCity(cityData)
-
-            // İlçe bilgisini al
-            const { data: districtData, error: districtError } = await supabase
-                .from('districts')
-                .select(`
-          *,
-          cities(*)
-        `)
-                .eq('slug', params.ilce_slug)
-                .eq('city_id', cityData.id)
-                .single()
-
-            if (districtError) throw districtError
-            setDistrict(districtData)
-
-            // Kategori bilgisini al
-            const { data: categoryData, error: categoryError } = await supabase
+                .eq('slug', il_slug)
+                .single(),
+            supabase
                 .from('categories')
                 .select('*')
-                .eq('slug', params.kategori_slug)
+                .eq('slug', kategori_slug)
                 .single()
+        ])
 
-            if (categoryError) throw categoryError
-            setCategory(categoryData)
+        if (cityResult.error) throw cityResult.error
+        if (categoryResult.error) throw categoryResult.error
 
-            // Alt kategorileri al
-            const { data: subCategoriesData, error: subCategoriesError } = await supabase
+        const cityData = cityResult.data
+        const categoryData = categoryResult.data
+
+        // İlçe bilgisini al
+        const { data: districtData, error: districtError } = await supabase
+            .from('districts')
+            .select(`
+                *,
+                cities(*)
+            `)
+            .eq('slug', ilce_slug)
+            .eq('city_id', cityData.id)
+            .single()
+
+        if (districtError) throw districtError
+
+        // Alt kategorileri ve işletmeleri paralel olarak al
+        const [subCategoriesResult, businessDistrictsResult] = await Promise.all([
+            supabase
                 .from('categories')
                 .select('*')
                 .eq('parent_id', categoryData.id)
                 .eq('is_active', true)
-                .order('display_order')
-
-            if (!subCategoriesError) {
-                setSubCategories(subCategoriesData || [])
-            }
-
-            // İşletmeleri al - business_categories ve business_districts tabloları üzerinden
-            // Önce bu kategori ve ilçede hizmet veren işletmeleri bul
-            const { data: businessDistrictsData, error: businessDistrictsError } = await supabase
+                .order('display_order'),
+            supabase
                 .from('business_districts')
                 .select('business_id')
                 .eq('district_id', districtData.id)
+        ])
 
-            if (businessDistrictsError) throw businessDistrictsError
+        if (businessDistrictsResult.error) throw businessDistrictsResult.error
 
-            const businessIds = businessDistrictsData?.map(item => item.business_id) || []
+        const businessIds = businessDistrictsResult.data?.map(item => item.business_id) || []
+        let businesses = []
 
-            if (businessIds.length > 0) {
-                // Bu işletmelerden seçilen kategoride hizmet verenleri al
-                const { data: businessesData, error: businessesError } = await supabase
-                    .from('business_categories')
-                    .select(`
-                        businesses(
-                            address,
-                            name,
-                            tagline,
-                            phone,
-                            website,
-                            rating,
-                            review_count,
-                            business_photos(image_url,is_cover),
-                            districts(name,slug),
-                            cities(name,slug)
-                        )
-                    `)
-                    .eq('category_id', categoryData.id)
-                    .in('business_id', businessIds)
+        if (businessIds.length > 0) {
+            // İşletmeleri al
+            const { data: businessesData, error: businessesError } = await supabase
+                .from('business_categories')
+                .select(`
+                    businesses(
+                        slug,
+                        address,
+                        name,
+                        tagline,
+                        phone,
+                        website,
+                        rating,
+                        review_count,
+                        business_photos(image_url,is_cover),
+                        districts(name,slug),
+                        cities(name,slug)
+                    )
+                `)
+                .eq('category_id', categoryData.id)
+                .in('business_id', businessIds)
+                .limit(50) // Performans için limit
 
-                if (businessesError) throw businessesError
+            if (businessesError) throw businessesError
 
-                // İşletme verilerini düzelt
-                const businesses = businessesData?.map(item => item.businesses).filter(Boolean) || []
-                setBusinesses(businesses)
-            } else {
-                setBusinesses([])
-            }
-
-        } catch (error) {
-            console.error('Veri yükleme hatası:', error)
-        } finally {
-            setLoading(false)
+            businesses = businessesData?.map(item => item.businesses).filter(Boolean) || []
         }
+
+        return {
+            city: cityData,
+            district: districtData,
+            category: categoryData,
+            subCategories: subCategoriesResult.data || [],
+            businesses
+        }
+    } catch (error) {
+        console.error('Veri yükleme hatası:', error)
+        throw error
+    }
+}
+
+export default async function ListingPage({ params }) {
+    let pageData
+    try {
+        pageData = await fetchPageData(params)
+    } catch (error) {
+        notFound()
     }
 
-    const openSearchMode = () => {
-        setIsSearchMode(true)
-    }
-
-    const closeSearchMode = () => {
-        setIsSearchMode(false)
-    }
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <Header />
-                <div className="flex items-center justify-center min-h-96">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500"></div>
-                </div>
-                <Footer />
-            </div>
-        )
-    }
-
-    if (!category || !district || !city) {
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <Header />
-                <div className="flex items-center justify-center min-h-96">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Sayfa bulunamadı</h1>
-                        <p className="text-gray-600 mb-4">Aradığınız sayfa mevcut değil.</p>
-                        <button
-                            onClick={() => router.push('/')}
-                            className="bg-[#FF6000] text-white px-6 py-2 rounded-lg hover:bg-[#ea580c] transition-colors"
-                        >
-                            Ana Sayfaya Dön
-                        </button>
-                    </div>
-                </div>
-                <Footer />
-            </div>
-        )
-    }
+    const { city, district, category, subCategories, businesses } = pageData
 
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
 
-            <main className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <main className="py-3 md:py-6">
+                <div className="max-w-7xl mx-auto px-2 md:px-4 lg:px-8">
                     {/* Arama Barı */}
                     <div className="mb-2 md:mb-6">
-                        <button
-                            onClick={openSearchMode}
-                            className="w-full flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-white shadow-sm hover:border-primary-300 transition-colors"
-                        >
-                            <svg className="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <span className="text-gray-900">
-                                {category.name} • {district.name}, {city.name}
-                            </span>
-                        </button>
+                        <SearchModal
+                            currentCategory={category}
+                            currentDistrict={district}
+                            currentCity={city}
+                        />
                     </div>
 
                     {/* Alt Kategori Filtreleri */}
@@ -202,24 +257,24 @@ export default function ListingPage() {
 
                     {/* Breadcrumb */}
                     <nav className="mb-2 md:mb-6">
-                        <ol className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-500 whitespace-nowrap">
+                        <ol className="flex items-center space-x-0 md:space-x-2 text-sm text-gray-500 whitespace-nowrap">
                             <li>
                                 <a href="/" className="hover:text-primary-600">enCivar</a>
                             </li>
                             <li className="flex items-center">
-                                <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="h-4 w-4 mx-0 md:mx-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                 </svg>
                                 <a href={`/${category.slug}`} className="hover:text-primary-600">{category.name}</a>
                             </li>
                             <li className="flex items-center">
-                                <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="h-4 w-4 mx-0 md:mx-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                 </svg>
                                 <a href={`/${category.slug}/${city.slug}`} className="hover:text-primary-600">{city.name}</a>
                             </li>
                             <li className="flex items-center">
-                                <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="h-4 w-4 mx-0 md:mx-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                 </svg>
                                 <span>{district.name}</span>
@@ -228,8 +283,8 @@ export default function ListingPage() {
                     </nav>
 
                     {/* Sayfa Başlığı */}
-                    <div className="mb-3 md:mb-8">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                    <div className="mb-2 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
                             {district.name}, {city.name} yakınlarındaki en iyi {businesses.length} {category.name.toLowerCase()}
                         </h1>
                         <p className="text-gray-600">
@@ -252,7 +307,9 @@ export default function ListingPage() {
                                                 alt={business.name}
                                                 width={400}
                                                 height={192}
-                                                className="w-full h-full object-cover"
+                                                className="object-cover"
+                                                style={{ width: '100%', height: '100%' }}
+                                                priority={index < 4}
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -282,7 +339,7 @@ export default function ListingPage() {
 
                                             {/* Konum */}
                                             <p className="text-sm text-gray-600">
-                                                {business.cities?.name}, {business.districts?.name}
+                                                {business.cities?.name} • {business.districts?.name}
                                             </p>
                                         </div>
 
@@ -354,32 +411,6 @@ export default function ListingPage() {
                     )}
                 </div>
             </main>
-
-            {/* Arama Modal */}
-            {isSearchMode && (
-                <div className="fixed inset-0 bg-white z-50">
-                    {/* Header */}
-                    <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-                        <button
-                            onClick={closeSearchMode}
-                            className="text-gray-600 hover:text-gray-900 font-medium text-sm"
-                        >
-                            Geri
-                        </button>
-                        <div className="flex-shrink-0">
-                            <Logo showText={true} />
-                        </div>
-                        <div className="w-12"></div>
-                    </div>
-
-                    {/* Arama İçeriği */}
-                    <div className="p-4">
-                        <p className="text-gray-600 text-center">
-                            Arama özelliği yakında eklenecek.
-                        </p>
-                    </div>
-                </div>
-            )}
 
             <Footer />
         </div>

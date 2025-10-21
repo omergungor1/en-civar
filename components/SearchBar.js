@@ -173,12 +173,7 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                     <div className="flex-shrink-0">
                         <Logo showText={true} />
                     </div>
-                    <button
-                        onClick={handleSearch}
-                        className="bg-[#FF6000] text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#ea580c] transition-colors"
-                    >
-                        Ara
-                    </button>
+                    <div className="w-12"></div>
                 </div>
 
                 {/* Arama alanları */}
@@ -255,6 +250,14 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                             </div>
                         )}
                     </div>
+
+                    {/* Ara Butonu */}
+                    <button
+                        onClick={handleSearch}
+                        className="w-full bg-[#FF6000] text-white px-4 py-3 rounded-lg font-medium hover:bg-[#ea580c] transition-colors"
+                    >
+                        Ara
+                    </button>
                 </div>
             </div>
         )
