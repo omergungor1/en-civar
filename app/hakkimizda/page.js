@@ -163,7 +163,7 @@ export default function AboutPage() {
                         </p>
                         <a
                             href="/iletisim"
-                            className="inline-block bg-white text-primary-500 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                            className="inline-block bg-white text-[#FF6000] px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
                         >
                             İletişim Sayfası
                         </a>

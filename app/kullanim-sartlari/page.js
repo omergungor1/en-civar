@@ -101,8 +101,7 @@ export default function TermsPage() {
 
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Uygulanacak Hukuk</h2>
                             <p className="text-gray-600 leading-relaxed mb-6">
-                                Bu kullanım şartları Türk hukukuna tabidir. Herhangi bir uyuşmazlık
-                                durumunda İstanbul mahkemeleri yetkilidir.
+                                Bu kullanım şartları Türk hukukuna tabidir.
                             </p>
 
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">12. İletişim</h2>
@@ -111,8 +110,8 @@ export default function TermsPage() {
                             </p>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-gray-600 mb-2"><strong>Email:</strong> info@encivar.com</p>
-                                <p className="text-gray-600 mb-2"><strong>Telefon:</strong> +90 (212) 123 45 67</p>
-                                <p className="text-gray-600"><strong>Adres:</strong> Maslak Mahallesi, Büyükdere Caddesi No: 123, Sarıyer/İstanbul</p>
+                                <p className="text-gray-600 mb-2"><strong>Telefon:</strong> +90 (542) 821 22 05</p>
+                                <p className="text-gray-600"><strong>Adres:</strong> İstanbul Caddesi, Osmangazi, Bursa, Türkiye</p>
                             </div>
                         </div>
                     </div>

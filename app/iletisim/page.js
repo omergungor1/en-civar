@@ -251,7 +251,7 @@ export default function ContactPage() {
                                         </svg>
                                         <div>
                                             <h3 className="font-medium text-gray-900">Telefon</h3>
-                                            <p className="text-gray-600">+90 (212) 123 45 67</p>
+                                            <p className="text-gray-600">+90 (542) 821 22 05</p>
                                         </div>
                                     </div>
 
@@ -263,8 +263,7 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-medium text-gray-900">Adres</h3>
                                             <p className="text-gray-600">
-                                                Maslak Mahallesi, Büyükdere Caddesi<br />
-                                                No: 123, Sarıyer/İstanbul
+                                                İstanbul Caddesi, Osmangazi, Bursa, Türkiye<br />
                                             </p>
                                         </div>
                                     </div>

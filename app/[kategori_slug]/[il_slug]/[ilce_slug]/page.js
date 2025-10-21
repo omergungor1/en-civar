@@ -284,8 +284,8 @@ export default async function ListingPage({ params }) {
                     </nav>
 
                     {/* Sayfa Başlığı */}
-                    <div className="mb-2 md:mb-8">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                    <div className="mb-4 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                             {district.name}, {city.name} yakınlarındaki en iyi {businesses.length} {category.name.toLowerCase()}
                         </h1>
                         <p className="text-gray-600">

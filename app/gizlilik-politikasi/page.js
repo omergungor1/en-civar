@@ -96,8 +96,8 @@ export default function PrivacyPolicyPage() {
                             </p>
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <p className="text-gray-600 mb-2"><strong>Email:</strong> info@encivar.com</p>
-                                <p className="text-gray-600 mb-2"><strong>Telefon:</strong> +90 (212) 123 45 67</p>
-                                <p className="text-gray-600"><strong>Adres:</strong> Maslak Mahallesi, Büyükdere Caddesi No: 123, Sarıyer/İstanbul</p>
+                                <p className="text-gray-600 mb-2"><strong>Telefon:</strong> +90 (542) 821 22 05</p>
+                                <p className="text-gray-600"><strong>Adres:</strong> İstanbul Caddesi, Osmangazi, Bursa, Türkiye</p>
                             </div>
 
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">10. Değişiklikler</h2>
