@@ -296,7 +296,7 @@ export default async function ListingPage({ params }) {
                     {/* İşletme Listesi */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {businesses.map((business, index) => (
-                            <BusinessCard key={index} business={business} index={index} />
+                            <BusinessCard key={index} business={business} index={index} categoryName={category.name} />
                         ))}
                     </div>
 

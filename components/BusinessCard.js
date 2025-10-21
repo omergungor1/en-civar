@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-export default function BusinessCard({ business, index }) {
+export default function BusinessCard({ business, index, categoryName }) {
 
     const coverPhoto = business.business_photos?.find(photo => photo.is_cover) || business.business_photos?.[0]
 
@@ -10,14 +10,26 @@ export default function BusinessCard({ business, index }) {
             <a href={`/isletme/${business.slug}`} className='block'>
                 <div className="w-full h-48 relative group overflow-hidden ">
                     {coverPhoto ? (
-                        <Image
-                            src={coverPhoto.image_url}
-                            alt={business.name}
-                            width={500}
-                            height={192}
-                            className="object-cover group-hover:scale-105 transition-transform duration-300 w-full h-full"
-                            priority={index < 4}
-                        />
+                        <div className="relative">
+                            <Image
+                                src={coverPhoto.image_url}
+                                alt={business.name}
+                                width={500}
+                                height={192}
+                                className="object-cover group-hover:scale-105 transition-transform duration-300 w-full h-full"
+                                priority={index < 4}
+                            />
+                            <div className="absolute top-2 left-2 bg-white/80 rounded-md p-2 z-10">
+                                {/* Rating */}
+                                <div className="flex items-center space-x-1">
+                                    <svg className="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-900">{business.rating || '0.0'}</span>
+                                    <span className="text-sm text-gray-500">({business.review_count || 0})</span>
+                                </div>
+                            </div>
+                        </div>
                     ) : (
                         <div className="w-full h-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
                             <svg className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,14 +44,7 @@ export default function BusinessCard({ business, index }) {
             <div className="p-2 pb-0 md:p-4 flex-1 flex flex-col hover:bg-gray-50 transition-colors ">
                 <div className="flex items-center space-x-1 justify-between">
                     <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 hover:text-[#FF6000] transition-colors">{business.name}</h3>
-                    {/* Rating */}
-                    <div className="flex items-center space-x-1">
-                        <svg className="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="text-sm font-medium text-gray-900">{business.rating || '0.0'}</span>
-                        <span className="text-sm text-gray-500">({business.review_count || 0})</span>
-                    </div>
+                    <span className="text-sm border-gray-200 border font-normal text-[#FF6000] opacity-80 px-2 py-1 rounded-md">{categoryName}</span>
                 </div>
 
                 {business.tagline && (
@@ -67,8 +72,7 @@ export default function BusinessCard({ business, index }) {
                             <svg className="h-4 w-4 mr-1 md:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
-                            <span className="hidden sm:inline">{business.phone}</span>
-                            <span className="sm:hidden">{business.phone}</span>
+                            <span className="text-md md:text-base font-semibold">{business.phone}</span>
                         </a>
                         <a
                             href={`https://wa.me/${business.phone.trim()}`}
