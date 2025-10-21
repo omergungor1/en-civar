@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build:ssg": "next build && next export",
+    "dev": "rm -rf .next && next dev",
+    "build": "rm -rf .next && next build",
+    "build:ssg": "rm -rf .next && next build",
     "start": "next start",
     "analyze": "ANALYZE=true next build"
   },
