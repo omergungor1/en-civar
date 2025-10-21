@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Header from '../../../../components/Header'
 import Footer from '../../../../components/Footer'
+import Logo from '../../../../components/Logo'
 import { supabase } from '../../../../lib/supabase'
 
 export default function ListingPage() {
@@ -89,8 +90,16 @@ export default function ListingPage() {
                     .from('business_categories')
                     .select(`
                         businesses(
-                            *,
-                            business_photos(*)
+                            address,
+                            name,
+                            tagline,
+                            phone,
+                            website,
+                            rating,
+                            review_count,
+                            business_photos(image_url,is_cover),
+                            districts(name,slug),
+                            cities(name,slug)
                         )
                     `)
                     .eq('category_id', categoryData.id)
@@ -160,7 +169,7 @@ export default function ListingPage() {
             <main className="py-6">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Arama Barı */}
-                    <div className="mb-6">
+                    <div className="mb-2 md:mb-6">
                         <button
                             onClick={openSearchMode}
                             className="w-full flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-white shadow-sm hover:border-primary-300 transition-colors"
@@ -176,12 +185,12 @@ export default function ListingPage() {
 
                     {/* Alt Kategori Filtreleri */}
                     {subCategories.length > 0 && (
-                        <div className="mb-6">
+                        <div className="mb-2 md:mb-6">
                             <div className="flex flex-wrap gap-2">
-                                {subCategories.map((subCategory) => (
+                                {subCategories.map((subCategory, index) => (
                                     <a
-                                        key={subCategory.id}
-                                        href={`/${city.slug}/${district.slug}/${subCategory.slug}`}
+                                        key={index}
+                                        href={`/${subCategory.slug}/${city.slug}/${district.slug}`}
                                         className="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-[#fff7ed] hover:border-primary-300 hover:text-primary-700 transition-colors"
                                     >
                                         {subCategory.name}
@@ -192,8 +201,8 @@ export default function ListingPage() {
                     )}
 
                     {/* Breadcrumb */}
-                    <nav className="mb-6">
-                        <ol className="flex items-center space-x-2 text-sm text-gray-500">
+                    <nav className="mb-2 md:mb-6">
+                        <ol className="flex items-center space-x-1 md:space-x-2 text-sm text-gray-500 whitespace-nowrap">
                             <li>
                                 <a href="/" className="hover:text-primary-600">enCivar</a>
                             </li>
@@ -201,7 +210,13 @@ export default function ListingPage() {
                                 <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                 </svg>
-                                <a href={`/kategoriler/${category.slug}`} className="hover:text-primary-600">{city.name}</a>
+                                <a href={`/${category.slug}`} className="hover:text-primary-600">{category.name}</a>
+                            </li>
+                            <li className="flex items-center">
+                                <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                </svg>
+                                <a href={`/${category.slug}/${city.slug}`} className="hover:text-primary-600">{city.name}</a>
                             </li>
                             <li className="flex items-center">
                                 <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
@@ -209,17 +224,11 @@ export default function ListingPage() {
                                 </svg>
                                 <span>{district.name}</span>
                             </li>
-                            <li className="flex items-center">
-                                <svg className="h-4 w-4 mx-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                </svg>
-                                <span>{category.name}</span>
-                            </li>
                         </ol>
                     </nav>
 
                     {/* Sayfa Başlığı */}
-                    <div className="mb-8">
+                    <div className="mb-3 md:mb-8">
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                             {district.name}, {city.name} yakınlarındaki en iyi {businesses.length} {category.name.toLowerCase()}
                         </h1>
@@ -230,11 +239,11 @@ export default function ListingPage() {
 
                     {/* İşletme Listesi */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {businesses.map((business) => {
+                        {businesses.map((business, index) => {
                             const coverPhoto = business.business_photos?.find(photo => photo.is_cover) || business.business_photos?.[0]
 
                             return (
-                                <div key={business.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                                <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                                     {/* İşletme Görseli */}
                                     <div className="w-full h-48">
                                         {coverPhoto ? (
@@ -271,10 +280,10 @@ export default function ListingPage() {
                                                 <span className="text-sm text-gray-500">({business.review_count || 0} değerlendirme)</span>
                                             </div>
 
-                                            {/* Adres */}
-                                            {business.address && (
-                                                <p className="text-sm text-gray-600">{business.address}</p>
-                                            )}
+                                            {/* Konum */}
+                                            <p className="text-sm text-gray-600">
+                                                {business.cities?.name}, {business.districts?.name}
+                                            </p>
                                         </div>
 
                                         {/* Aksiyon Butonları */}
@@ -358,7 +367,7 @@ export default function ListingPage() {
                             Geri
                         </button>
                         <div className="flex-shrink-0">
-                            <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
+                            <Logo showText={true} />
                         </div>
                         <div className="w-12"></div>
                     </div>

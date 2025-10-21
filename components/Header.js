@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import Logo from './Logo'
 
 export default function Header({ isSearchMode = false, onCancel, onSearch }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -37,13 +37,7 @@ export default function Header({ isSearchMode = false, onCancel, onSearch }) {
                     {/* Orta - Logo */}
                     <div className="flex-shrink-0">
                         <a href="/">
-                            <Image
-                                src="/logo.png"
-                                alt="EnCivar"
-                                width={120}
-                                height={32}
-                                className="h-22 md:h-28 w-auto"
-                            />
+                            <Logo showText={true} />
                         </a>
                     </div>
 

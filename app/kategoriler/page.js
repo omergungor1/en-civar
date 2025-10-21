@@ -216,7 +216,7 @@ export default function CategoriesPage() {
                                                 {subcategories[category.id].map((subcategory) => (
                                                     <a
                                                         key={subcategory.id}
-                                                        href={`/kategoriler/${subcategory.slug}`}
+                                                        href={`/${subcategory.slug}`}
                                                         className="group/sub block"
                                                     >
                                                         <div className="bg-white rounded-lg p-3 hover:shadow-md hover:shadow-[#FF6000]/10 transition-all duration-200 hover:-translate-y-1">

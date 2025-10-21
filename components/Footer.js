@@ -1,3 +1,5 @@
+import Logo from './Logo'
+
 export default function Footer() {
     return (
         <footer className="bg-gray-50 border-t border-gray-200">
@@ -5,8 +7,8 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Logo ve açıklama */}
                     <div className="col-span-1 md:col-span-2">
-                        <div className="flex items-center mb-4">
-                            <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
+                        <div className="mb-4">
+                            <Logo showText={true} />
                         </div>
                         <p className="text-gray-600 text-sm leading-relaxed max-w-md">
                             EnCivar, Türkiye'nin en kapsamlı yerel rehberi. Civarındaki en iyi işletmeleri keşfedin,

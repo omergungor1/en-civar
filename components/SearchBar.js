@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import Logo from './Logo'
 
 export default function SearchBar({ onSearch, selectedCategory, selectedDistrict, onCategorySelect, onDistrictSelect }) {
     const [isSearchMode, setIsSearchMode] = useState(false)
@@ -170,7 +171,7 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
                         İptal
                     </button>
                     <div className="flex-shrink-0">
-                        <img src="/logo.png" alt="EnCivar" className="h-22 md:h-28 w-auto" />
+                        <Logo showText={true} />
                     </div>
                     <button
                         onClick={handleSearch}
@@ -263,12 +264,18 @@ export default function SearchBar({ onSearch, selectedCategory, selectedDistrict
         <div className="px-4 py-4">
             <div
                 onClick={openSearchMode}
-                className="flex items-center border border-gray-300 rounded-lg px-3 py-3 bg-white shadow-sm cursor-pointer hover:border-primary-300 transition-colors"
+                className="flex items-center border-2 border-white rounded-2xl px-2 md:px-4 py-2 md:py-4 bg-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
             >
-                <svg className="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-gray-400 mr-2 md:mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="text-gray-500">Ne lazım? Çilingir, Lokanta vs.</span>
+                <span className="text-gray-500 text-lg font-medium">Ne lazım? Çilingir, Lokanta vs.</span>
+                <div className="ml-auto">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
             </div>
         </div>
     )

@@ -74,6 +74,7 @@ export default function CategoryList() {
                                         src={category.icon_url}
                                         alt={category.picture_alt_text || category.name}
                                         fill
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                                         className="object-contain group-hover:scale-110 transition-transform duration-300 p-2"
                                     />
                                 ) : (
@@ -88,12 +89,12 @@ export default function CategoryList() {
                             </div>
 
                             {/* Kategori bilgileri */}
-                            <div className="p-3 md:p-4">
-                                <h3 className="font-semibold text-gray-900 text-sm md:text-base group-hover:text-[#ea580c] transition-colors duration-200">
+                            <div className="p-3 md:p-4 flex flex-col h-20 md:h-24">
+                                <h3 className="font-semibold text-gray-900 text-sm md:text-base group-hover:text-[#ea580c] transition-colors duration-200 line-clamp-2">
                                     {category.name}
                                 </h3>
                                 {category.tagline && (
-                                    <p className="text-xs md:text-sm text-gray-500 mt-1 line-clamp-2 group-hover:text-gray-600 transition-colors duration-200">
+                                    <p className="text-xs md:text-sm text-gray-500 mt-1 line-clamp-2 group-hover:text-gray-600 transition-colors duration-200 flex-1">
                                         {category.tagline}
                                     </p>
                                 )}
