@@ -25,6 +25,22 @@ export default function RootLayout({ children }) {
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'AW-17670181553');
+            
+            // Conversion tracking function
+            function gtag_report_conversion(url) {
+              var callback = function () {
+                if (typeof(url) != 'undefined') {
+                  window.location = url;
+                }
+              };
+              gtag('event', 'conversion', {
+                  'send_to': 'AW-17670181553/I111CPzAy7EbELGl5ulB',
+                  'value': 1.0,
+                  'currency': 'TRY',
+                  'event_callback': callback
+              });
+              return false;
+            }
           `}
         </Script>
       </head>
