@@ -43,6 +43,29 @@ export default function RootLayout({ children }) {
             }
           `}
         </Script>
+
+        {/* AdsGuardPro Tracking Script */}
+        <Script id="agp-config" strategy="afterInteractive">
+          {`
+            window.AGP_TRACKING_ID = 't39ibMcq_5DlR9Rx';
+            window.AGP_API_URL = 'https://ads-guard-pro.vercel.app';
+            console.log('AdsGuardPro config loaded:', window.AGP_TRACKING_ID);
+            
+            // Tracker yükleme kontrolü
+            var script = document.createElement('script');
+            script.src = 'https://ads-guard-pro.vercel.app/js/tracker.js';
+            script.async = true;
+            script.onload = function() {
+              console.log('AdsGuardPro tracker.js loaded successfully');
+            };
+            script.onerror = function() {
+              console.error('AdsGuardPro tracker.js failed to load');
+            };
+            document.head.appendChild(script);
+          `}
+        </Script>
+        {/* End AdsGuardPro */}
+
       </head>
       <body className={inter.className}>
         {children}
