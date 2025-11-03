@@ -44,6 +44,23 @@ export default function RootLayout({ children }) {
           `}
         </Script>
 
+        {/* ClickCease.com Tracking */}
+        <Script id="clickcease" strategy="afterInteractive">
+          {`
+            var script = document.createElement('script');
+            script.async = true;
+            script.type = 'text/javascript';
+            script.src = 'https://www.clickcease.com/monitor/stat.js';
+            document.head.appendChild(script);
+          `}
+        </Script>
+        <noscript>
+          <a href="https://www.clickcease.com" rel="nofollow">
+            <img src="https://monitor.clickcease.com" alt="ClickCease" />
+          </a>
+        </noscript>
+        {/* End ClickCease.com Tracking */}
+
         {/* AdsGuardPro Tracking Script */}
         <Script id="agp-config" strategy="afterInteractive">
           {`
