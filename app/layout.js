@@ -14,8 +14,25 @@ export default function RootLayout({ children }) {
   return (
     <html lang="tr">
       <head>
+
+        {/* GTM head script */}
+        <Script id="gtm-head" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-P58XRGWF');
+          `}
+        </Script>
+
+
+
+
+
+        {/* -------------------------- */}
         {/* Google Analytics */}
-        <Script
+        {/* <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-17670181553"
           strategy="afterInteractive"
         />
@@ -42,10 +59,10 @@ export default function RootLayout({ children }) {
               return false;
             }
           `}
-        </Script>
+        </Script> */}
 
         {/* ClickCease.com Tracking */}
-        <Script id="clickcease" strategy="afterInteractive">
+        {/* <Script id="clickcease" strategy="afterInteractive">
           {`
             var script = document.createElement('script');
             script.async = true;
@@ -58,33 +75,37 @@ export default function RootLayout({ children }) {
           <a href="https://www.clickcease.com" rel="nofollow">
             <img src="https://monitor.clickcease.com" alt="ClickCease" />
           </a>
-        </noscript>
+        </noscript> */}
         {/* End ClickCease.com Tracking */}
 
-        {/* AdsGuardPro Tracking Script */}
-        <Script id="agp-config" strategy="afterInteractive">
+        {/* AdGuardy Tracking Script */}
+        {/* <Script id="agp-config" strategy="afterInteractive">
           {`
             window.AGP_TRACKING_ID = 't39ibMcq_5DlR9Rx';
-            window.AGP_API_URL = 'https://ads-guard-pro.vercel.app';
-            console.log('AdsGuardPro config loaded:', window.AGP_TRACKING_ID);
+            window.AGP_API_URL = 'https://adguardy.com';
+            console.log('adguardy config loaded:', window.AGP_TRACKING_ID);
             
             // Tracker yükleme kontrolü
             var script = document.createElement('script');
-            script.src = 'https://ads-guard-pro.vercel.app/js/tracker.js';
+            script.src = 'https://adguardy.com/js/tracker.js';
             script.async = true;
             script.onload = function() {
-              console.log('AdsGuardPro tracker.js loaded successfully');
+              console.log('adguardy tracker.js loaded successfully');
             };
             script.onerror = function() {
-              console.error('AdsGuardPro tracker.js failed to load');
+              console.error('adguardy tracker.js failed to load');
             };
             document.head.appendChild(script);
           `}
-        </Script>
-        {/* End AdsGuardPro */}
+        </Script> */}
+        {/* End adguardy */}
 
       </head>
       <body className={inter.className}>
+        <noscript>
+          <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P58XRGWF"
+            height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe>
+        </noscript>
         {children}
       </body>
     </html>
